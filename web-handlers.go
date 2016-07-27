@@ -374,8 +374,12 @@ func (web *webAPIHandlers) Upload(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bucket := vars["bucket"]
 	object := vars["object"]
-	// FIXME: Allow file upload handler to set content-type, content-encoding.
-	if _, err := web.ObjectAPI.PutObject(bucket, object, -1, r.Body, nil); err != nil {
+	// Set the Content-Type and Content-Encoding if provided in the request.
+	reqMetadata := map[string]string{
+		"Content-Type":     r.Header.Get("Content-Type"),
+		"Content-Encoding": r.Header.Get("Content-Encoding"),
+	}
+	if _, err := web.ObjectAPI.PutObject(bucket, object, -1, r.Body, reqMetadata); err != nil {
 		writeWebErrorResponse(w, err)
 	}
 }
